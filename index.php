@@ -27,6 +27,7 @@ $parameters = dataForm();
                 <li><a href="#cart">Carrito (<span id="cart-count">0</span>)</a></li>
                 <li><a href="user_profile.php" id="user-profile-link" style="display:none;">Mi Perfil</a></li>
                 <li><a href="auth.php" id="auth-link">Mi Cuenta</a></li>
+                <li><a href="logout.php" id="logout-link" style="display:none;">Cerrar Sesión</a></li>
             </ul>
         </nav>
         <div class="banner" id="home">

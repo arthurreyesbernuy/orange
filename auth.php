@@ -48,7 +48,7 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Restaurant Sabor & Delicia</div>
+            <div class="logo">Orange</div>
             <ul>
                 <li><a href="index.php">Inicio</a></li>
             </ul>
@@ -80,7 +80,7 @@
     </main>
     
     <footer>
-        <p>&copy; 2025 Restaurant Sabor & Delicia. Todos los derechos reservados.</p>
+        <p>&copy; 2025 Restaurant Orange. Todos los derechos reservados.</p>
     </footer>
 
     <script src="js/api.js"></script>

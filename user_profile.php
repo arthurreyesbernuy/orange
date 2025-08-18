@@ -105,7 +105,7 @@
             <ul>
                 <li><a href="index.php">Inicio</a></li>
                 <li><a href="#cart">Carrito</a></li>
-                <li><a href="#" id="logout-link">Cerrar Sesión</a></li>
+                <li><a href="logout.php" id="logout-link">Cerrar Sesión</a></li>
             </ul>
         </nav>
     </header>
