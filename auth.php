@@ -80,7 +80,7 @@
     </main>
     
     <footer>
-        <p>&copy; 2025 Restaurant Orange. Todos los derechos reservados.</p>
+        <p>&copy; 2025 Orange Food Truck. Todos los derechos reservados.</p>
     </footer>
 
     <script src="js/api.js"></script>

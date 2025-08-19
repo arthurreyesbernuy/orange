@@ -9,7 +9,7 @@ $parameters = dataForm();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant Orange</title>
+    <title>Orange Food Truck</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@4.5.2/dist/journal/bootstrap.min.css"
         integrity="sha384-QDSPDoVOoSWz2ypaRUidLmLYl4RyoBWI44iA5agn6jHegBxZkNqgm2eHb6yZ5bYs" crossorigin="anonymous" />
@@ -64,7 +64,7 @@ $parameters = dataForm();
     </main>
 
     <footer>
-        <p>&copy; 2025 Restaurant Orange. Todos los derechos reservados.</p>
+        <p>&copy; 2025 Orange Food Truck. Todos los derechos reservados.</p>
     </footer>
 
     <div id="checkout-modal" class="modal">
