@@ -215,6 +215,22 @@ h2 {
     background-color: #218838;
 }
 
+.customize-btn {
+    background-color: #007bff; /* Azul para personalizar */
+    color: white;
+    border: none;
+    padding: 0.8rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    align-self: flex-start;
+}
+
+.customize-btn:hover {
+    background-color: #0056b3;
+}
+
 #back-to-categories {
     display: block;
     margin: 2rem auto 0;
@@ -370,26 +386,26 @@ footer {
     }
 }
 
-/* Estilos para el pop-up (Modal) */
+/* Estilos para los modales */
 .modal {
-    display: none; /* Oculto por defecto */
-    position: fixed; /* Se mantiene en la pantalla */
-    z-index: 1; /* Se superpone a otros elementos */
+    display: none;
+    position: fixed;
+    z-index: 1050;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Habilita el scroll si es necesario */
-    background-color: rgba(0,0,0,0.4); /* Fondo semi-transparente */
-    padding-top: 60px; /* Espacio para el contenido */
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+    padding-top: 60px;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 5% auto; /* Centrar verticalmente */
+    margin: 5% auto;
     padding: 2rem;
     border: 1px solid #888;
-    width: 80%; /* Ancho del modal */
+    width: 80%;
     max-width: 500px;
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
@@ -397,7 +413,7 @@ footer {
     position: relative;
 }
 
-.close-btn {
+.close-btn, .close-btn-mod {
     color: #aaa;
     position: absolute;
     right: 20px;
@@ -407,8 +423,8 @@ footer {
     cursor: pointer;
 }
 
-.close-btn:hover,
-.close-btn:focus {
+.close-btn:hover, .close-btn-mod:hover,
+.close-btn:focus, .close-btn-mod:focus {
     color: black;
     text-decoration: none;
 }
@@ -428,3 +444,51 @@ footer {
 .btn-confirm-payment:hover {
     background-color: #218838;
 }
+
+/* Estilos específicos para el modal de modificadores */
+#modifiers-list-container {
+    text-align: left;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 5px;
+}
+
+.modifier-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.quantity-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+#minus-qty-btn, #plus-qty-btn {
+    background-color: #ff6600;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#minus-qty-btn:hover, #plus-qty-btn:hover {
+    background-color: #e65c00;
+}
+
+#product-qty {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+

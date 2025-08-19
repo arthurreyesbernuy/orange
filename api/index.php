@@ -10,6 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+$netcoreApiUrl = 'http://localhost:55581/api/Web';
+
 // Simulación de una base de datos de usuarios y pedidos en la sesión
 session_start();
 $users = $_SESSION['users'] ?? [];
@@ -59,7 +61,15 @@ $input = json_decode(file_get_contents('php://input'), true);
 switch ($resource) {
     case 'categories':
         if ($method === 'GET') {
-            echo json_encode(['success' => true, 'data' => $simulatedData['categories']]);
+            $ch = curl_init($netcoreApiUrl.'/Categoria_Sellst_Activo');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            http_response_code($httpCode);
+            echo $response;
         } else {
             http_response_code(405);
             echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
@@ -69,11 +79,44 @@ switch ($resource) {
     case 'products':
         if ($method === 'GET') {
             $categoryId = $_GET['category_id'] ?? null;
-            if ($categoryId && isset($simulatedData['products'][$categoryId])) {
-                echo json_encode(['success' => true, 'data' => $simulatedData['products'][$categoryId]]);
+            if ($categoryId) {
+                // Reenviar la solicitud a la API de NetCore con el ID de la categoría
+                $ch = curl_init($netcoreApiUrl.'/Productos_Sellst_Por_Categoria_Activo?category_id='.$categoryId);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                http_response_code($httpCode);
+                echo $response;
             } else {
-                http_response_code(404);
-                echo json_encode(['success' => false, 'message' => 'Categoría de productos no encontrada.']);
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID de categoría no proporcionado.']);
+            }
+        } else {
+            http_response_code(405);
+            echo json_encode(['success' => false, 'message' => 'Método no permitido.']);
+        }
+        break;
+
+    case 'modifiers':
+        if ($method === 'GET') {
+            $productId = $_GET['product_id'] ?? null;
+            if ($productId) {
+                // Reenviar la solicitud a la API de NetCore con el ID del producto
+                $ch = curl_init($netcoreApiUrl . '/Modificadores_Sellst_By_Producto?product_id=' . $productId);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                http_response_code($httpCode);
+                echo $response;
+            } else {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'ID de producto no proporcionado.']);
             }
         } else {
             http_response_code(405);
@@ -121,30 +164,18 @@ switch ($resource) {
     case 'register':
         if ($method === 'POST') {
             if ($input && isset($input['email'], $input['password'], $input['name'], $input['address'], $input['phone'])) {
-                $email = strtolower($input['email']);
-                $userExists = false;
-                foreach ($users as $user) {
-                    if ($user['email'] === $email) {
-                        $userExists = true;
-                        break;
-                    }
-                }
-                if ($userExists) {
-                    http_response_code(409);
-                    echo json_encode(['success' => false, 'message' => 'El correo electrónico ya está registrado.']);
-                } else {
-                    $newUserId = count($users) + 1;
-                    $users[] = [
-                        'id' => $newUserId,
-                        'name' => $input['name'],
-                        'email' => $email,
-                        'password' => password_hash($input['password'], PASSWORD_DEFAULT),
-                        'address' => $input['address'],
-                        'phone' => $input['phone']
-                    ];
-                    saveUsers($users);
-                    echo json_encode(['success' => true, 'message' => 'Registro exitoso.']);
-                }
+                $ch = curl_init($netcoreApiUrl.'/Ins_Usuario');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($input));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                http_response_code($httpCode);
+                echo $response;
             } else {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Datos de registro incompletos.']);
@@ -158,21 +189,18 @@ switch ($resource) {
     case 'login':
         if ($method === 'POST') {
             if ($input && isset($input['email'], $input['password'])) {
-                $email = strtolower($input['email']);
-                $user = null;
-                foreach ($users as $u) {
-                    if ($u['email'] === $email) {
-                        $user = $u;
-                        break;
-                    }
-                }
-                if ($user && password_verify($input['password'], $user['password'])) {
-                    unset($user['password']);
-                    echo json_encode(['success' => true, 'message' => 'Inicio de sesión exitoso.', 'data' => $user]);
-                } else {
-                    http_response_code(401);
-                    echo json_encode(['success' => false, 'message' => 'Correo o contraseña incorrectos.']);
-                }
+                $ch = curl_init($netcoreApiUrl.'/Sel_Usuario_Valida');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($input));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                http_response_code($httpCode);
+                echo $response;
             } else {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'Datos de inicio de sesión incompletos.']);
@@ -220,3 +248,4 @@ switch ($resource) {
         echo json_encode(['success' => false, 'message' => 'Recurso no encontrado.']);
         break;
 }
+?>

@@ -83,6 +83,23 @@ $parameters = dataForm();
         </form>
     </div>
 
+    <div id="modifiers-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn-mod">&times;</span>
+            <h3 id="modifiers-title"></h3>
+            <div id="modifiers-list-container">
+                <p>Cargando modificadores...</p>
+            </div>
+            <div class="quantity-controls">
+                <button id="minus-qty-btn">-</button>
+                <span id="product-qty">1</span>
+                <button id="plus-qty-btn">+</button>
+            </div>
+            <p>Precio total: <span id="modifiers-total">S/ 0.00</span></p>
+            <button id="add-to-cart-mod-btn" class="btn-confirm-payment">Añadir al Carrito</button>
+        </div>
+    </div>
+
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
 </body>

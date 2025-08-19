@@ -1,7 +1,7 @@
 // public/js/api.js
 
-//const API_BASE_URL = 'http://localhost:8083/orange/api/';
-const API_BASE_URL = 'https://orangefood.com.pe/api/';
+const API_BASE_URL = 'http://localhost:8083/orange/api/';
+//const API_BASE_URL = 'https://orangefood.com.pe/api/';
 
 // Simulación de datos para la API
 const simulatedData = {
@@ -36,25 +36,60 @@ const simulatedData = {
  * Simula la llamada a la API para obtener categorías.
  */
 async function getCategoriesAPI() {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            console.log('API: Obteniendo categorías...');
-            resolve({ success: true, data: simulatedData.categories });
-        }, 500);
-    });
+    try {
+        console.log('API: Obteniendo categorías...');
+        const response = await fetch(`${API_BASE_URL}categories`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error al obtener categorías:', error);
+        return { success: false, message: 'Error de conexión o datos inválidos.' };
+    }
+
+    // return new Promise(resolve => {
+    //     setTimeout(() => {
+    //         console.log('API: Obteniendo categorías...');
+    //         resolve({ success: true, data: simulatedData.categories });
+    //     }, 500);
+    // });
 }
 
 /**
  * Simula la llamada a la API para obtener productos por categoría.
  */
 async function getProductsByCategoryAPI(categoryId) {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            console.log(`API: Obteniendo productos para categoría ${categoryId}...`);
-            const products = simulatedData.products[categoryId] || [];
-            resolve({ success: true, data: products });
-        }, 500);
-    });
+     try {
+        console.log('API: Obteniendo categorías...');
+        const response = await fetch(`${API_BASE_URL}products?category_id=`+categoryId);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error al obtener productos:', error);
+        return { success: false, message: 'Error de conexión o datos inválidos.' };
+    }
+    // return new Promise(resolve => {
+    //     setTimeout(() => {
+    //         console.log(`API: Obteniendo productos para categoría ${categoryId}...`);
+    //         const products = simulatedData.products[categoryId] || [];
+    //         resolve({ success: true, data: products });
+    //     }, 500);
+    // });
+}
+
+/**
+ * Simula la llamada a la API para obtener modificadores de un producto.
+ */
+async function getModifiersAPI(productId) {
+    console.log(`API: Obteniendo modificadores para el producto ${productId}...`);
+    const response = await fetch(`api/index.php?resource=modifiers&product_id=${productId}`);
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
 }
 
 /**

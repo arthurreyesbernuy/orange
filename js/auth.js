@@ -81,11 +81,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const response = await registerUserAPI(newUser);
-            if (response.success) {
+            // if (response.success) {
+            //     alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+            //     showLoginLink.click();
+            // } else {
+            //     registerError.textContent = response.message;
+            //     registerError.style.display = 'block';
+            // }
+            if (response.idresultado === 1) {
                 alert('¡Registro exitoso! Ya puedes iniciar sesión.');
                 showLoginLink.click();
+            } else if (response.idresultado === -1) {
+                registerError.textContent = 'El correo electrónico ya existe.';
+                registerError.style.display = 'block';
             } else {
-                registerError.textContent = response.message;
+                registerError.textContent = 'Error en el registro. Inténtalo de nuevo.';
                 registerError.style.display = 'block';
             }
         } catch (error) {

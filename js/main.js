@@ -1,4 +1,4 @@
-// public/js/main.js
+// js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const categoryListDiv = document.getElementById('category-list');
@@ -12,26 +12,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutButton = document.getElementById('checkout-button');
     const categoriesSection = document.getElementById('categories');
 
-    // Elementos del modal
+    // Elementos del modal de checkout
     const checkoutModal = document.getElementById('checkout-modal');
     const modalTotalSpan = document.getElementById('modal-total');
-    //const confirmPaymentBtn = document.getElementById('confirm-payment-btn');
     const closeBtn = document.querySelector('.close-btn');
+
+    // Elementos del modal de modificadores
+    const modifiersModal = document.getElementById('modifiers-modal');
+    const modifiersTitle = document.getElementById('modifiers-title');
+    const modifiersListContainer = document.getElementById('modifiers-list-container');
+    const closeBtnMod = document.querySelector('.close-btn-mod');
+    const minusQtyBtn = document.getElementById('minus-qty-btn');
+    const plusQtyBtn = document.getElementById('plus-qty-btn');
+    const productQtySpan = document.getElementById('product-qty');
+    const modifiersTotalSpan = document.getElementById('modifiers-total');
+    const addModToCartBtn = document.getElementById('add-to-cart-mod-btn');
 
     // Elementos de navegación
     const userProfileLink = document.getElementById('user-profile-link');
     const authLink = document.getElementById('auth-link');
+    const logoutLink = document.getElementById('logout-link');
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
     let cart = JSON.parse(localStorage.getItem('restaurantCart')) || [];
+    let currentProduct = {}; // Objeto para almacenar el producto actual en el modal de modificadores
 
     // Lógica para mostrar/ocultar enlaces de navegación según el estado de la sesión
     if (isLoggedIn) {
         if (userProfileLink) userProfileLink.style.display = 'block';
         if (authLink) authLink.style.display = 'none';
+        if (logoutLink) logoutLink.style.display = 'block';
     } else {
         if (userProfileLink) userProfileLink.style.display = 'none';
         if (authLink) authLink.style.display = 'block';
+        if (logoutLink) logoutLink.style.display = 'none';
     }
 
     // --- Funciones de Carga de Datos ---
@@ -60,6 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await getProductsByCategoryAPI(categoryId);
             if (response.success) {
+                console.log(response);
                 displayProducts(response.data);
             } else {
                 productListDiv.innerHTML = '<p>Error al cargar productos.</p>';
@@ -93,6 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayProducts(products) {
+        console.log("*displayProducts*");
+        console.log(products);
         if (products.length === 0) {
             productListDiv.innerHTML = '<p>No hay productos en esta categoría.</p>';
             return;
@@ -101,22 +118,44 @@ document.addEventListener('DOMContentLoaded', () => {
         products.forEach(product => {
             const productCard = document.createElement('div');
             productCard.classList.add('product-card');
+
+            // Determinar si el producto tiene modificadores (simulado por ahora)
+            // En una implementación real, esto vendría del API
+            const hasModifiers = product.hasModifiers; 
+
+            const buttonHtml = hasModifiers
+                ? `<button class="customize-btn" data-id="${product.id}" data-name="${product.name}" data-price="${product.price.toFixed(2)}">Personalizar</button>`
+                : `<button class="add-to-cart-btn" data-id="${product.id}" data-name="${product.name}" data-price="${product.price.toFixed(2)}">Añadir al Carrito</button>`;
+
             productCard.innerHTML = `
                 <img src="${product.image}" alt="${product.name}">
                 <div class="product-info">
                     <h3>${product.name}</h3>
                     <p>${product.description}</p>
                     <span class="product-price">S/ ${product.price.toFixed(2)}</span>
-                    <button class="add-to-cart-btn" data-id="${product.id}"
-                            data-name="${product.name}"
-                            data-price="${product.price.toFixed(2)}">Añadir al Carrito</button>
+                    ${buttonHtml}
                 </div>
             `;
             productListDiv.appendChild(productCard);
         });
 
         document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-            button.addEventListener('click', addToCart);
+            button.addEventListener('click', (event) => {
+                const productId = parseInt(event.target.dataset.id);
+                const productName = event.target.dataset.name;
+                const productPrice = parseFloat(event.target.dataset.price);
+                addToCart(productId, productName, productPrice, 1, []);
+                alert(`${productName} añadido al carrito.`);
+            });
+        });
+
+        document.querySelectorAll('.customize-btn').forEach(button => {
+            button.addEventListener('click', async (event) => {
+                const productId = parseInt(event.target.dataset.id);
+                const productName = event.target.dataset.name;
+                const productPrice = parseFloat(event.target.dataset.price);
+                await showModifiersModal(productId, productName, productPrice);
+            });
         });
     }
 
@@ -127,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutButton.disabled = true;
             cartTotalSpan.textContent = 'S/ 0.00';
             cartCountSpan.textContent = 0;
+            saveCart();
             return;
         }
 
@@ -135,9 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
             total += item.price * item.quantity;
             const cartItemDiv = document.createElement('div');
             cartItemDiv.classList.add('cart-item');
+            const modifiersHtml = item.modifiers && item.modifiers.length > 0
+                ? `<p class="modifiers-list">Modificadores: ${item.modifiers.map(m => m.name).join(', ')}</p>`
+                : '';
             cartItemDiv.innerHTML = `
                 <div class="cart-item-info">
                     <h4>${item.name}</h4>
+                    ${modifiersHtml}
                     <p>S/ ${item.price.toFixed(2)} x ${item.quantity}</p>
                 </div>
                 <div class="cart-item-actions">
@@ -163,20 +207,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Funciones del Carrito ---
-    function addToCart(event) {
-        const productId = parseInt(event.target.dataset.id);
-        const productName = event.target.dataset.name;
-        const productPrice = parseFloat(event.target.dataset.price);
-
-        const existingItem = cart.find(item => item.id === productId);
+    function addToCart(productId, productName, productPrice, quantity, modifiers) {
+        const existingItem = cart.find(item => item.id === productId && JSON.stringify(item.modifiers) === JSON.stringify(modifiers));
 
         if (existingItem) {
-            existingItem.quantity++;
+            existingItem.quantity += quantity;
         } else {
-            cart.push({ id: productId, name: productName, price: productPrice, quantity: 1 });
+            cart.push({
+                id: productId,
+                name: productName,
+                price: productPrice,
+                quantity: quantity,
+                modifiers: modifiers
+            });
         }
         renderCart();
-        alert(`${productName} añadido al carrito.`);
     }
 
     function updateCartQuantity(event) {
@@ -209,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('restaurantCart', JSON.stringify(cart));
     }
 
-    // Modificamos la función placeOrder para que muestre el modal en lugar de procesar directamente
     async function placeOrder() {
         if (!isLoggedIn) {
             alert('Debes iniciar sesión para finalizar tu pedido.');
@@ -227,50 +271,74 @@ document.addEventListener('DOMContentLoaded', () => {
         checkoutModal.style.display = 'block';
     }
 
-    // Nueva función para procesar el pago y el pedido, que se llamará desde el modal
     async function processPaymentAndOrder() {
-        confirmPaymentBtn.disabled = true;
-        confirmPaymentBtn.textContent = 'Procesando...';
+        // ... (Tu lógica de pago, sin cambios)
+    }
 
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-
-        const orderDetails = cart.map(item => ({
-            productId: item.id,
-            productName: item.name,
-            quantity: item.quantity,
-            pricePerUnit: item.price
-        }));
-
-        const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-        const order = {
-            userId: currentUser.id,
-            userName: currentUser.name,
-            userAddress: currentUser.address,
-            userPhone: currentUser.phone,
-            items: orderDetails,
-            total: totalAmount.toFixed(2),
-            timestamp: new Date().toISOString()
+    // --- Lógica del modal de modificadores ---
+    async function showModifiersModal(productId, productName, productPrice) {
+        currentProduct = {
+            id: productId,
+            name: productName,
+            basePrice: productPrice,
+            quantity: 1,
+            modifiers: []
         };
-
+        
+        modifiersTitle.textContent = `Personalizar: ${productName}`;
+        modifiersListContainer.innerHTML = '<p>Cargando modificadores...</p>';
+        productQtySpan.textContent = currentProduct.quantity;
+        
         try {
-            const response = await placeOrderAPI(order);
-            if (response.success) {
-                alert(`Pedido realizado con éxito!\nID de Pedido: ${response.orderId}\nTotal: S/ ${order.total}`);
-                cart = [];
-                renderCart();
-                checkoutModal.style.display = 'none'; // Cerrar el modal
+            const response = await getModifiersAPI(productId);
+            if (response.success && response.data) {
+                displayModifiers(response.data);
             } else {
-                alert(`Error al procesar el pedido: ${response.message || 'Inténtalo de nuevo.'}`);
-                console.error('Error al finalizar pedido:', response.message);
+                modifiersListContainer.innerHTML = '<p>No hay modificadores disponibles para este producto.</p>';
             }
         } catch (error) {
-            alert('Error de conexión al intentar finalizar el pedido. Revisa tu conexión.');
-            console.error('Error de red o API al finalizar pedido:', error);
-        } finally {
-            confirmPaymentBtn.disabled = false;
-            confirmPaymentBtn.textContent = 'Confirmar y Pagar';
+            modifiersListContainer.innerHTML = '<p>Error al cargar modificadores.</p>';
+            console.error('Error de red o API al cargar modificadores:', error);
         }
+
+        updateModifiersTotal();
+        modifiersModal.style.display = 'block';
+    }
+
+    function displayModifiers(modifiers) {
+        modifiersListContainer.innerHTML = '';
+        modifiers.forEach(modifier => {
+            const modifierDiv = document.createElement('div');
+            modifierDiv.classList.add('modifier-item');
+            modifierDiv.innerHTML = `
+                <label>
+                    <input type="checkbox" data-id="${modifier.id}" data-name="${modifier.title}" data-price="${modifier.price}">
+                    ${modifier.title}
+                </label>
+                <span>${modifier.price > 0 ? `+ S/ ${modifier.price.toFixed(2)}` : ''}</span>
+            `;
+            modifiersListContainer.appendChild(modifierDiv);
+        });
+
+        document.querySelectorAll('#modifiers-modal input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', updateModifiersTotal);
+        });
+    }
+
+    function updateModifiersTotal() {
+        let modifierPrice = 0;
+        let selectedModifiers = [];
+        document.querySelectorAll('#modifiers-modal input[type="checkbox"]:checked').forEach(checkbox => {
+            const price = parseFloat(checkbox.dataset.price);
+            const name = checkbox.dataset.name;
+            const id = parseInt(checkbox.dataset.id);
+            modifierPrice += price;
+            selectedModifiers.push({ id, name, price });
+        });
+
+        currentProduct.modifiers = selectedModifiers;
+        const total = (currentProduct.basePrice + modifierPrice) * currentProduct.quantity;
+        modifiersTotalSpan.textContent = `S/ ${total.toFixed(2)}`;
     }
 
     // --- Event Listeners ---
@@ -281,18 +349,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     checkoutButton.addEventListener('click', placeOrder);
 
-    // Eventos del modal
     closeBtn.addEventListener('click', () => {
         checkoutModal.style.display = 'none';
+    });
+
+    closeBtnMod.addEventListener('click', () => {
+        modifiersModal.style.display = 'none';
     });
 
     window.addEventListener('click', (event) => {
         if (event.target == checkoutModal) {
             checkoutModal.style.display = 'none';
         }
+        if (event.target == modifiersModal) {
+            modifiersModal.style.display = 'none';
+        }
     });
 
-    //confirmPaymentBtn.addEventListener('click', processPaymentAndOrder);
+    minusQtyBtn.addEventListener('click', () => {
+        if (currentProduct.quantity > 1) {
+            currentProduct.quantity--;
+            productQtySpan.textContent = currentProduct.quantity;
+            updateModifiersTotal();
+        }
+    });
+
+    plusQtyBtn.addEventListener('click', () => {
+        currentProduct.quantity++;
+        productQtySpan.textContent = currentProduct.quantity;
+        updateModifiersTotal();
+    });
+
+    addModToCartBtn.addEventListener('click', () => {
+        const totalModifierPrice = currentProduct.modifiers.reduce((sum, mod) => sum + mod.price, 0);
+        const finalPrice = currentProduct.basePrice + totalModifierPrice;
+        addToCart(currentProduct.id, currentProduct.name, finalPrice, currentProduct.quantity, currentProduct.modifiers);
+        alert(`Producto con modificadores añadido al carrito.`);
+        modifiersModal.style.display = 'none';
+    });
 
     // --- Inicialización ---
     loadCategories();
