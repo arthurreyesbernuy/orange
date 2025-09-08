@@ -10,49 +10,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
-$netcoreApiUrl = 'http://localhost:55581/api/Web';
+//$netcoreApiUrl = 'http://localhost:55581/api/Web';
+$netcoreApiUrl = 'http://190.119.63.91:8083/api/Web';
 
 // Simulación de una base de datos de usuarios y pedidos en la sesión
 session_start();
-$users = $_SESSION['users'] ?? [];
-$orders = $_SESSION['orders'] ?? [];
 
-function saveUsers($users) {
-    $_SESSION['users'] = $users;
-}
+$orders = $_SESSION['orders'] ?? [];
 
 function saveOrders($orders) {
     $_SESSION['orders'] = $orders;
 }
-
-// Simulación de datos (normalmente vendrían de una base de datos)
-$simulatedData = [
-    'categories' => [
-        ['id' => 1, 'name' => 'Entradas', 'image' => 'images/entradas.jpg'],
-        ['id' => 2, 'name' => 'Platos Fuertes', 'image' => 'images/platos_fuertes.jpg'],
-        ['id' => 3, 'name' => 'Postres', 'image' => 'images/postres.jpg'],
-        ['id' => 4, 'name' => 'Bebidas', 'image' => 'images/bebidas.jpg']
-    ],
-    'products' => [
-        1 => [ // Entradas
-            ['id' => 101, 'name' => 'Ceviche Clásico', 'description' => 'Frescos trozos de pescado marinados en limón, ají limo y cebolla roja.', 'price' => 35.00, 'image' => 'images/ceviche.jpg'],
-            ['id' => 102, 'name' => 'Papa a la Huancaína', 'description' => 'Rodajas de papa sancochada bañadas en salsa de ají amarillo y queso fresco.', 'price' => 18.00, 'image' => 'images/papa_huancaina.jpg']
-        ],
-        2 => [ // Platos Fuertes
-            ['id' => 201, 'name' => 'Lomo Saltado', 'description' => 'Trozos de lomo fino salteados al wok con cebolla, tomate y papas fritas.', 'price' => 45.00, 'image' => 'images/lomo_saltado.jpg'],
-            ['id' => 202, 'name' => 'Ají de Gallina', 'description' => 'Pechuga de gallina deshilachada en salsa de ají amarillo, pan y nueces.', 'price' => 38.00, 'image' => 'images/aji_gallina.jpg'],
-            ['id' => 203, 'name' => 'Arroz con Pato', 'description' => 'Arroz cremoso con pato confitado y aderezo de culantro.', 'price' => 42.00, 'image' => 'images/arroz_pato.jpg']
-        ],
-        3 => [ // Postres
-            ['id' => 301, 'name' => 'Suspiro a la Limeña', 'description' => 'Postre tradicional peruano a base de manjar blanco y merengue.', 'price' => 15.00, 'image' => 'images/suspiro_limena.jpg'],
-            ['id' => 302, 'name' => 'Mazamorra Morada', 'description' => 'Dulce de maíz morado con frutas secas y especias.', 'price' => 10.00, 'image' => 'images/mazamorra_morada.jpg']
-        ],
-        4 => [ // Bebidas
-            ['id' => 401, 'name' => 'Chicha Morada', 'description' => 'Bebida refrescante a base de maíz morado, piña y especias.', 'price' => 8.00, 'image' => 'images/chicha_morada.jpg'],
-            ['id' => 402, 'name' => 'Inca Kola (Lata)', 'description' => 'Gaseosa peruana de sabor único.', 'price' => 6.00, 'image' => 'images/inca_kola.jpg']
-        ]
-    ]
-];
 
 $resource = $_GET['resource'] ?? '';
 $method = $_SERVER['REQUEST_METHOD'];
@@ -212,27 +180,23 @@ switch ($resource) {
         break;
 
     case 'profile':
-        if ($method === 'PUT') {
+        if ($method === 'POST') {
             if ($input && isset($input['id'])) {
                 $userId = $input['id'];
-                $found = false;
-                foreach ($users as &$user) {
-                    if ($user['id'] == $userId) {
-                        $user['name'] = $input['name'] ?? $user['name'];
-                        $user['address'] = $input['address'] ?? $user['address'];
-                        $user['phone'] = $input['phone'] ?? $user['phone'];
-                        $found = true;
-                        break;
-                    }
-                }
-                if ($found) {
-                    saveUsers($users);
-                    unset($user['password']);
-                    echo json_encode(['success' => true, 'message' => 'Perfil actualizado con éxito.', 'data' => $user]);
-                } else {
-                    http_response_code(404);
-                    echo json_encode(['success' => false, 'message' => 'Usuario no encontrado.']);
-                }
+                $found = true;                           
+
+                $ch = curl_init($netcoreApiUrl.'/Usuario_Upd');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($input));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);             
+                                
+                unset($user['password']);
+                echo json_encode(['success' => true, 'message' => 'Perfil actualizado con éxito.', 'data' => $user]);              
             } else {
                 http_response_code(400);
                 echo json_encode(['success' => false, 'message' => 'ID de usuario no proporcionado.']);

@@ -1,9 +1,9 @@
 <?php
 require_once "keys.php";
 
-$parameters = dataForm();
+// $parameters = dataForm();
 
-?>
+// ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,7 +20,7 @@ $parameters = dataForm();
 <body>
     <header>
         <nav>
-            <div class="logo">Orange</div>
+            <div class="logo">Orange Food Truck</div>
             <ul>
                 <li><a href="index.php">Inicio</a></li>
                 <li><a href="#categories">Menú</a></li>
@@ -68,16 +68,12 @@ $parameters = dataForm();
     </footer>
 
     <div id="checkout-modal" class="modal">
-        <form action="https://secure.micuentaweb.pe/vads-payment/" method="post">
+        <form action="https://secure.micuentaweb.pe/vads-payment/" method="post" id="payment-form">
             <div class="modal-content">
                 <span class="close-btn">&times;</span>
                 <h3>Resumen de tu Pedido</h3>
                 <p id="modal-total">Total a pagar: S/ 0.00</p>
-                <?php
-                    foreach ($parameters as $key => $value) {
-                        echo "<input type='hidden' name='$key' value='$value' >";
-                    }
-                ?>
+                <div id="payment-form-campos"></div>
                 <button class="btn btn-primary" type="submit" name="pagar">Pagar</button>
             </div>
         </form>

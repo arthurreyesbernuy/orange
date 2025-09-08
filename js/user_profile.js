@@ -2,8 +2,11 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const profileNameInput = document.getElementById('profile-name');
+    const profileApellidosInput = document.getElementById('profile-apellidos');
+    const profileNumeroDocumentoInput = document.getElementById('numero-documento');
     const profileEmailInput = document.getElementById('profile-email');
     const profileAddressInput = document.getElementById('profile-address');
+    const profileCiudadInput = document.getElementById('profile-ciudad');
     const profilePhoneInput = document.getElementById('profile-phone');
     const updateProfileBtn = document.getElementById('update-profile-btn');
     const logoutBtn = document.getElementById('logout-btn');
@@ -21,9 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Rellenar los campos del perfil
     profileNameInput.value = currentUser.name;
+    profileApellidosInput.value = currentUser.apellidos;
+    profileNumeroDocumentoInput.value = currentUser.numerodocumento;
     profileEmailInput.value = currentUser.email;
     profileAddressInput.value = currentUser.address;
     profilePhoneInput.value = currentUser.phone;
+    profileCiudadInput.value = currentUser.ciudad;
 
     // Cargar y mostrar los pedidos del usuario
     async function loadUserOrders() {
@@ -71,7 +77,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const updatedUser = {
             id: currentUser.id,
             name: profileNameInput.value,
+            apellidos: profileApellidosInput.value,
+            numerodocumento: profileNumeroDocumentoInput.value,
             email: profileEmailInput.value,
+            ciudad: profileCiudadInput.value,
             address: profileAddressInput.value,
             phone: profilePhoneInput.value
         };

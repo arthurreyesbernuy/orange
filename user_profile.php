@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil - Orange</title>
+    <title>Mi Perfil - Orange Food Truck</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
         .profile-container, .orders-container {
@@ -101,7 +101,7 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Orange</div>
+            <div class="logo">Orange Food Truck</div>
             <ul>
                 <li><a href="index.php">Inicio</a></li>
                 <li><a href="#cart">Carrito</a></li>
@@ -114,17 +114,28 @@
         <section class="profile-container">
             <h2>Mi Perfil</h2>
             <div class="profile-info" id="profile-info-display">
-                <label for="profile-name">Nombre:</label>
-                <input type="text" id="profile-name" readonly>
+                <label for="profile-name">Nombres:</label>
+                <input type="text" id="profile-name">
+
+                <label for="profile-apellidos">Apellidos:</label>
+                <input type="text" id="profile-apellidos">
+
+                <label for="numero-documento">DNI/CEX/PAS:</label>
+                <input type="text" id="numero-documento">
 
                 <label for="profile-email">Correo:</label>
-                <input type="email" id="profile-email" readonly>
+                <input type="email" id="profile-email">
 
                 <label for="profile-address">Dirección:</label>
                 <input type="text" id="profile-address">
 
+                <label for="profile-ciudad">Ciudad:</label>
+                <input type="text" id="profile-ciudad">
+
                 <label for="profile-phone">Teléfono:</label>
                 <input type="tel" id="profile-phone">
+
+                
             </div>
             <div class="profile-actions">
                 <button id="update-profile-btn">Actualizar Datos</button>

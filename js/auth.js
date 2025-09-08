@@ -49,8 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await loginUserAPI(email, password);
             if (response.success) {
                 localStorage.setItem('currentUser', JSON.stringify(response.data));
-                localStorage.setItem('isLoggedIn', 'true');
-                alert('¡Inicio de sesión exitoso!');
+                localStorage.setItem('isLoggedIn', 'true');                
                 window.location.href = 'index.php';
             } else {
                 loginError.textContent = response.message;
@@ -89,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             //     registerError.style.display = 'block';
             // }
             if (response.idresultado === 1) {
-                alert('¡Registro exitoso! Ya puedes iniciar sesión.');
+                // alert('¡Registro exitoso! Ya puedes iniciar sesión.');
                 showLoginLink.click();
             } else if (response.idresultado === -1) {
                 registerError.textContent = 'El correo electrónico ya existe.';

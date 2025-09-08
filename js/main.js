@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('restaurantCart', JSON.stringify(cart));
     }
 
-    async function placeOrder() {
+   async function placeOrder() {
         if (!isLoggedIn) {
             alert('Debes iniciar sesión para finalizar tu pedido.');
             window.location.href = 'auth.php';
@@ -268,6 +268,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         modalTotalSpan.textContent = `Total a pagar: S/ ${totalAmount.toFixed(2)}`;
+        
+        // Obtenemos los datos del usuario logueado
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        // Creamos y llenamos el formulario dinámicamente
+        const paymentForm = document.getElementById('payment-form-campos');
+        paymentForm.innerHTML = ''; // Limpiamos campos anteriores
+        
+        // Agregamos los campos ocultos
+        const fields = {
+            "vads_action_mode": "INTERACTIVE",
+            "vads_amount": totalAmount * 100, // En céntimos
+            "vads_ctx_mode": "TEST", // o PRODUCTION
+            "vads_currency": 604, // Código ISO para PEN (Soles peruanos)
+            "vads_cust_address": currentUser.address,
+            "vads_cust_city": "Lima", // Estos datos deben venir del usuario
+            "vads_cust_country": "PE", // Estos datos deben venir del usuario
+            "vads_cust_email": currentUser.email,
+            "vads_cust_first_name": currentUser.name.split(' ')[0], // Asumimos que el primer nombre es el primer string
+            "vads_cust_last_name": currentUser.name.split(' ').slice(1).join(' '), // El resto del nombre
+            "vads_cust_national_id": "44773858", // Este dato debe venir del usuario
+            "vads_cust_phone": currentUser.phone,
+            "vads_cust_state": "Lima", // Estos datos deben venir del usuario
+            "vads_cust_zip": "", // Este dato debe venir del usuario
+            "vads_order_id": "ORD" + Math.floor(Math.random() * 1000000),
+            "vads_page_action": "PAYMENT",
+            "vads_payment_config": "SINGLE",
+            "vads_redirect_success_timeout": 5,
+            "vads_return_mode": "POST",
+            "vads_site_id": "48576921", // ID de tienda
+            "vads_trans_date": new Date().toISOString().replace(/[^0-9]/g, '').slice(0, -3),
+            "vads_trans_id": (Math.random() * 1000000).toFixed(0),
+            "vads_url_return": "https://orangefood.com.pe/result.php",
+            "vads_version": "V2"
+        };
+        
+        // Ahora agregamos los campos al formulario
+        for (const key in fields) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = fields[key];
+            paymentForm.appendChild(input);
+        }
+
+        // const pagarButton = document.createElement('button');
+        // pagarButton.classList.add('btn', 'btn-primary');
+        // pagarButton.type = 'submit';
+        // pagarButton.name = 'pagar';
+        // pagarButton.textContent = 'Pagar';
+
+        // paymentForm.appendChild(pagarButton);
+
         checkoutModal.style.display = 'block';
     }
 

@@ -48,7 +48,7 @@
 <body>
     <header>
         <nav>
-            <div class="logo">Orange</div>
+            <div class="logo">Orange Food Truck</div>
             <ul>
                 <li><a href="index.php">Inicio</a></li>
             </ul>
